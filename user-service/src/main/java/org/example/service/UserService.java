@@ -5,6 +5,7 @@ import org.example.dto.UserDto;
 import org.example.exception.UserNotFoundException;
 import org.example.model.User;
 import org.example.repository.UserRepository;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -12,11 +13,14 @@ import java.util.List;
 @Service
 public class UserService {
     private final UserRepository userRepository;
-    public UserService(UserRepository userRepository){
+    private final KafkaTemplate<String, String> kafkaTemplate;
+    public UserService(UserRepository userRepository, KafkaTemplate<String, String> kafkaTemplate){
         this.userRepository =  userRepository;
+        this.kafkaTemplate = kafkaTemplate;
     }
     public UserDto saveUser(UserDto userDto){
         User user = userRepository.save(dtoToEntity(userDto));
+        kafkaTemplate.send("user-events","user-created", user.getEmail());
         log.info("User created with Id: {}", user.getId());
         return entityToDto(user);
     }
@@ -56,6 +60,7 @@ public class UserService {
                     return new UserNotFoundException(id);
                 });
         userRepository.delete(user);
+        kafkaTemplate.send("user-events","user-deleted", user.getEmail());
         log.info("User was deleted with id: {}", id);
     }
     public UserDto entityToDto(User user){
