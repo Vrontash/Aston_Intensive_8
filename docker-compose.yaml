@@ -85,7 +85,6 @@ services:
         condition: service_healthy
       eureka:
         condition: service_healthy
-    restart: on-failure
     networks:
       - microservices-network
 
@@ -108,7 +107,6 @@ services:
         condition: service_healthy
       eureka:
         condition: service_healthy
-    restart: on-failure
     networks:
       - microservices-network
 
@@ -130,7 +128,6 @@ services:
         condition: service_started
       eureka:
         condition: service_healthy
-    restart: on-failure
     networks:
       - microservices-network
 
