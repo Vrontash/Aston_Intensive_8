@@ -1,5 +1,6 @@
 server:
   port: 8080
+
 spring:
   cloud:
     gateway:
@@ -18,20 +19,22 @@ spring:
                 name: userServiceCB
                 fallbackUri: forward:/fallback/users
         - id: eureka-server
-          uri: http://localhost:8761
+          uri: ${EUREKA_SERVER_URI:http://eureka:8761}
           predicates:
             - Path=/eureka/**
+          filters:
+            - RedirectTo=302, http://localhost:8761/
         - id: notification-service
           uri: lb://notification-service
           predicates:
-            - Path=/notification/**
+            - Path=/api/notification/**
           filters:
-            - StripPrefix=1
+            - StripPrefix=2
 
 eureka:
   client:
     service-url:
-      defaultZone: http://localhost:8761/eureka/eureka/
+      defaultZone: ${EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE:http://eureka:8761/eureka/}
     register-with-eureka: true
     fetch-registry: true
 
